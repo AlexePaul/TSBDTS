@@ -1,0 +1,6 @@
+oracledb
+pillow
+torch
+open_clip_torch
+numpy
+dotenv

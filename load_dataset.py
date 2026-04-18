@@ -22,33 +22,10 @@ PRETRAINED = "openai"
 
 SUPPORTED_EXTENSIONS = {".jpg", ".jpeg", ".png", ".webp", ".bmp"}
 
-CATEGORY_MAP = {
-    "cat": "animals",
-    "dog": "animals",
-    "bird": "animals",
-    "car": "vehicles",
-    "mountain": "nature",
-    "forest": "nature",
-    "beach": "nature",
-    "city": "urban",
-    "building": "urban",
-    "food": "food",
-    "pizza": "food",
-    "burger": "food",
-}
-
 model, _, preprocess = open_clip.create_model_and_transforms(
     MODEL_NAME,
     pretrained=PRETRAINED
 )
-
-
-def infer_category(filename: str) -> str:
-    lower = filename.lower()
-    for key, value in CATEGORY_MAP.items():
-        if key in lower:
-            return value
-    return "other"
 
 
 def build_description(filename: str) -> str:
@@ -91,14 +68,14 @@ def row_exists(cur, file_name: str) -> bool:
     return cur.fetchone() is not None
 
 
-def insert_image(cur, file_name: str, category: str, image_path: str, description: str, embedding: array.array):
+def insert_image(cur, file_name: str, image_path: str, description: str, embedding: array.array):
     cur.execute(
         """
         INSERT INTO images_dataset
-        (file_name, category, image_path, description, embedding)
-        VALUES (:1, :2, :3, :4, :5)
+        (file_name, image_path, description, embedding)
+        VALUES (:1, :2, :3, :4)
         """,
-        [file_name, category, image_path, description, embedding],
+        [file_name, image_path, description, embedding],
     )
 
 
@@ -140,21 +117,19 @@ def main():
                         skipped += 1
                         continue
 
-                    category = infer_category(file_name)
                     description = build_description(file_name)
                     embedding = get_image_embedding(full_path)
 
                     insert_image(
                         cur=cur,
                         file_name=file_name,
-                        category=category,
                         image_path=full_path,
                         description=description,
                         embedding=embedding,
                     )
 
                     inserted += 1
-                    print(f"[OK] Inserat: {file_name} | category={category}")
+                    print(f"[OK] Inserat: {file_name}")
 
                 except (UnidentifiedImageError, OSError) as img_err:
                     failed += 1

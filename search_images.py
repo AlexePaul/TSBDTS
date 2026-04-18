@@ -45,7 +45,6 @@ def search_images(query_text: str, top_k: int = 5):
         with conn.cursor() as cur:
             sql = f"""
                 SELECT file_name,
-                       category,
                        image_path,
                        description,
                        VECTOR_DISTANCE(embedding, :1, COSINE) AS dist
@@ -61,7 +60,7 @@ def search_images(query_text: str, top_k: int = 5):
         conn.close()
 
 if __name__ == "__main__":
-    query = "forest in sunlight"
+    query = "Mango"
     results = search_images(query, top_k=5)
 
     print(f"\nQuery: {query}\n")
@@ -69,9 +68,8 @@ if __name__ == "__main__":
         print("No results found.")
     else:
         for idx, row in enumerate(results, start=1):
-            file_name, category, image_path, description, dist = row
+            file_name, image_path, description, dist = row
             print(f"{idx}. {file_name}")
-            print(f"   category: {category}")
             print(f"   path: {image_path}")
             print(f"   description: {description}")
             print(f"   distance: {dist}")
