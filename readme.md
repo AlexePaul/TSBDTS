@@ -6,6 +6,10 @@ Acest proiect este un motor simplu de cautare semantica a imaginilor. Foloseste 
 - Alexe Vasile Paul
 - Grupa: 505
 
+## Prezentare powerpoint
+
+Prezentarea powerpoint a aplicatiei este disponibila [aici](https://docs.google.com/presentation/d/1cJqGnc-zo0X6UiKkymfSc1dT9LtK6UcAFCSMRBhM9yY/edit?usp=sharing).
+
 ## Ce face proiectul
 
 - `load_dataset.py`: prelucreaza imaginile din folderul `dataset`, genereaza embedding-uri folosind modelul open-source CLIP pentru fiecare imagine si le insereaza in tabela `images_dataset` din Oracle. Are si o optiune de a nu insera imagini duplicate in baza de date, verificand daca exista deja o imagine cu acelasi nume.
