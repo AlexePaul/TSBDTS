@@ -23,7 +23,7 @@ DATASET_DIR = "dataset"
 MODEL_NAME = "ViT-B-32"
 PRETRAINED = "openai"
 
-# Extensii de fișiere suportate
+# Extensii de fisiere suportate
 SUPPORTED_EXTENSIONS = {".jpg", ".jpeg", ".png", ".webp", ".bmp"}
 
 # Incarcam modelul open-clip pre-antrenat si transformatiile
@@ -90,7 +90,7 @@ def insert_image(cur, file_name: str, image_path: str, description: str, embeddi
 # Functia principala pentru incarcarea dataset-ului de imagini in baza de date Oracle
 def main():
     if not os.path.isdir(DATASET_DIR):
-        print(f"Folderul '{DATASET_DIR}' nu există.")
+        print(f"Folderul '{DATASET_DIR}' nu exista.")
         return
 
     # Sortam lista de fisiere in ordine alfabetica
@@ -101,11 +101,11 @@ def main():
     ]
 
     if not image_files:
-        print(f"Nu am găsit imagini în folderul '{DATASET_DIR}'.")
+        print(f"Nu am gasit imagini in folderul '{DATASET_DIR}'.")
         return
 
     # Afisam numarul de imagini gasite
-    print(f"Am găsit {len(image_files)} imagini.")
+    print(f"Am gasit {len(image_files)} imagini.")
 
     # Stabilim conexiunea la baza de date
     conn = oracledb.connect(
@@ -126,7 +126,7 @@ def main():
 
                 try:
                     if row_exists(cur, file_name):
-                        print(f"[SKIP] Există deja în DB: {file_name}")
+                        print(f"[SKIP] Exista deja in DB: {file_name}")
                         skipped += 1
                         continue
 
@@ -150,7 +150,7 @@ def main():
                 # Verificam daca imaginea este invalida
                 except (UnidentifiedImageError, OSError) as img_err:
                     failed += 1
-                    print(f"[ERR] Imagine invalidă '{file_name}': {img_err}")
+                    print(f"[ERR] Imagine invalida '{file_name}': {img_err}")
                 # Orice alte erori la procesarea imaginii
                 except Exception as ex:
                     failed += 1
@@ -166,8 +166,8 @@ def main():
     # Afisam un rezumat al operatiunilor
     print("\nRezumat:")
     print(f"  Inserate: {inserted}")
-    print(f"  Sărite:   {skipped}")
-    print(f"  Eșuate:   {failed}")
+    print(f"  Sarite:   {skipped}")
+    print(f"  Esuate:   {failed}")
 
 
 # Rulare script

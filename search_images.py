@@ -36,7 +36,6 @@ def get_text_embedding(text: str) -> array.array:
     vec = features[0].cpu().numpy().astype("float32")
     return array.array("f", vec.tolist())
 
-
 # Logica principala pentru cautarea de imagini in baza de date Oracle
 def search_images(query_text: str, top_k: int = 5):
     # Convertim textul de intrare intr-un vector de embedding
