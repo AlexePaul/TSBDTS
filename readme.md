@@ -8,10 +8,9 @@ Acest proiect este un motor simplu de cautare semantica a imaginilor. Foloseste 
 
 ## Ce face proiectul
 
-- `load_dataset.py`: prelucreaza imaginile din folderul `dataset`, genereaza embedding-uri CLIP pentru fiecare imagine si le insereaza in tabela `images_dataset` din Oracle.
-- `search_images.py`: construieste un embedding CLIP pentru textul introdus de utilizator si cauta in Oracle Database cele mai apropiate imagini folosind `VECTOR_DISTANCE(..., COSINE)`.
-- `app.py`: interfata Streamlit pentru cautare interactiva, afiseaza rezultatele cu imagini, descriere si distanta.
-- `embed_one_image.py`: un exemplu simplu care calculeaza embedding-ul pentru o singura imagine.
+- `load_dataset.py`: prelucreaza imaginile din folderul `dataset`, genereaza embedding-uri folosind modelul open-source CLIP pentru fiecare imagine si le insereaza in tabela `images_dataset` din Oracle. Are si o optiune de a nu insera imagini duplicate in baza de date, verificand daca exista deja o imagine cu acelasi nume.
+- `search_images.py`: construieste embedding-ul folosind modelul open-source CLIP pentru textul introdus de utilizator si cauta in Oracle Database cele mai apropiate imagini folosind `VECTOR_DISTANCE(..., COSINE)`.
+- `app.py`: interfata Streamlit pentru cautare interactiva, afiseaza rezultatele cu imagini, descriere si distanta (cosine similarity).
 
 ## Tehnologii folosite
 
@@ -21,12 +20,12 @@ Acest proiect este un motor simplu de cautare semantica a imaginilor. Foloseste 
 
 ## Configurare
 
-1. Creaza un fisier `.env` in acelasi folder cu cheile:
+1. Creaza un fisier `.env` in acelasi folder cu cheile (un exemplu e dat in `.env.example`):
 
-```
-DB_USER= Utilizator DB
-DB_PASSWORD= Parola DB
-DB_DSN= DB Server Name / FREEPDB1
+```env
+DB_USER=username
+DB_PASSWORD=password
+DB_DSN=host:port/service_name
 ```
 
 2. Adaugarea imaginilor in folderul `dataset`.
@@ -42,3 +41,5 @@ pip install -r requirements.txt
 ```
 streamlit run app.py
 ```
+
+6. Testarea aplicatiei apasand butonul "search" in interfata Streamlit.

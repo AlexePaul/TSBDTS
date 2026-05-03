@@ -11,29 +11,35 @@ oracledb.defaults.fetch_lobs = False
 
 load_dotenv()
 
+# Date conexiune baza de date (Oracle)
 DB_USER = os.environ['DB_USER']
 DB_PASSWORD = os.environ['DB_PASSWORD']
 DB_DSN = os.environ['DB_DSN']
 
+# Directorul cu dataset-ul de imagini
 DATASET_DIR = "dataset"
 
+# Model pre-antrenat open-clip
 MODEL_NAME = "ViT-B-32"
 PRETRAINED = "openai"
 
+# Extensii de fișiere suportate
 SUPPORTED_EXTENSIONS = {".jpg", ".jpeg", ".png", ".webp", ".bmp"}
 
+# Incarcam modelul open-clip pre-antrenat si transformatiile
 model, _, preprocess = open_clip.create_model_and_transforms(
     MODEL_NAME,
     pretrained=PRETRAINED
 )
 
 
+# Functia de construire a descrierii dintr-un nume de fisier
 def build_description(filename: str) -> str:
     name, _ = os.path.splitext(filename)
     clean = name.replace("_", " ").replace("-", " ").strip()
     return clean
 
-
+# Functia de verificare a extensiei de fisier
 def is_supported_image(path: str) -> bool:
     ext = os.path.splitext(path)[1].lower()
     if ext in SUPPORTED_EXTENSIONS:
@@ -43,6 +49,7 @@ def is_supported_image(path: str) -> bool:
     return mime_type is not None and mime_type.startswith("image/")
 
 
+# Functia de transformare a unei imagini intr-un vector de embedding
 def get_image_embedding(path: str) -> array.array:
     image = Image.open(path).convert("RGB")
     image_tensor = preprocess(image).unsqueeze(0)
@@ -55,6 +62,7 @@ def get_image_embedding(path: str) -> array.array:
     return array.array("f", vec.tolist())
 
 
+# Functia de verificare a existentei unei imagini in baza de date
 def row_exists(cur, file_name: str) -> bool:
     cur.execute(
         """
@@ -68,6 +76,7 @@ def row_exists(cur, file_name: str) -> bool:
     return cur.fetchone() is not None
 
 
+# Functia de inserare a unei imagini in baza de date
 def insert_image(cur, file_name: str, image_path: str, description: str, embedding: array.array):
     cur.execute(
         """
@@ -78,12 +87,13 @@ def insert_image(cur, file_name: str, image_path: str, description: str, embeddi
         [file_name, image_path, description, embedding],
     )
 
-
+# Functia principala pentru incarcarea dataset-ului de imagini in baza de date Oracle
 def main():
     if not os.path.isdir(DATASET_DIR):
         print(f"Folderul '{DATASET_DIR}' nu există.")
         return
 
+    # Sortam lista de fisiere in ordine alfabetica
     files = sorted(os.listdir(DATASET_DIR))
     image_files = [
         f for f in files
@@ -94,8 +104,10 @@ def main():
         print(f"Nu am găsit imagini în folderul '{DATASET_DIR}'.")
         return
 
+    # Afisam numarul de imagini gasite
     print(f"Am găsit {len(image_files)} imagini.")
 
+    # Stabilim conexiunea la baza de date
     conn = oracledb.connect(
         user=DB_USER,
         password=DB_PASSWORD,
@@ -106,6 +118,7 @@ def main():
     skipped = 0
     failed = 0
 
+    # Blocul try-finally pentru a ne asigura ca conexiunea la baza de date este inchisa
     try:
         with conn.cursor() as cur:
             for file_name in image_files:
@@ -117,9 +130,12 @@ def main():
                         skipped += 1
                         continue
 
+                    # Construim descrierea imaginii
                     description = build_description(file_name)
+                    # Calculam vectorul de embedding pentru imagine
                     embedding = get_image_embedding(full_path)
 
+                    # Inseram imaginea in baza de date
                     insert_image(
                         cur=cur,
                         file_name=file_name,
@@ -131,24 +147,29 @@ def main():
                     inserted += 1
                     print(f"[OK] Inserat: {file_name}")
 
+                # Verificam daca imaginea este invalida
                 except (UnidentifiedImageError, OSError) as img_err:
                     failed += 1
                     print(f"[ERR] Imagine invalidă '{file_name}': {img_err}")
-
+                # Orice alte erori la procesarea imaginii
                 except Exception as ex:
                     failed += 1
                     print(f"[ERR] Nu am putut insera '{file_name}': {ex}")
 
+            # Comitem modificarile in baza de date
             conn.commit()
 
     finally:
+        # Inchidem conexiunea la baza de date
         conn.close()
 
+    # Afisam un rezumat al operatiunilor
     print("\nRezumat:")
     print(f"  Inserate: {inserted}")
     print(f"  Sărite:   {skipped}")
     print(f"  Eșuate:   {failed}")
 
 
+# Rulare script
 if __name__ == "__main__":
     main()
